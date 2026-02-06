@@ -1,9 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Accueil - Marmiton{% endblock %}
 
 {% block body %}
-    <h1 class="text-3xl font-bold underline">
-        Hello world!
-    </h1>
+    {# Categories section #}
+    <section>
+        <h1 class="text-2xl font-bold text-foreground mb-6">Catégories</h1>
+
+        {% if categories is empty %}
+            <p class="text-muted-foreground">Aucune catégorie pour le moment.</p>
+        {% else %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {% for category in categories %}
+                    <a href="#" class="block rounded-lg bg-card text-card-foreground p-6 border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
+                        <h2 class="text-lg font-semibold">{{ category.label }}</h2>
+                        <p class="text-sm text-muted-foreground mt-1">
+                            {{ category.recipes|length }} recette{{ category.recipes|length > 1 ? 's' : '' }}
+                        </p>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </section>
 {% endblock %}

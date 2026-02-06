@@ -1,28 +1,72 @@
-{% extends 'base.html.twig' %}
+{% extends 'layouts/auth.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block body %}
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
-
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
+    <div class="w-full max-w-sm">
+        {# Logo / Brand #}
+        <div class="text-center mb-8">
+            <a href="{{ path('app_home') }}" class="text-3xl font-bold text-primary">
+                Marmiton
+            </a>
         </div>
-    {% endif %}
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
-    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+        {# Login card #}
+        <div class="bg-card text-card-foreground rounded-lg border border-border shadow-sm p-6">
+            <h1 class="text-xl font-semibold mb-1">Connexion</h1>
+            <p class="text-sm text-muted-foreground mb-6">Entrez vos identifiants pour continuer</p>
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
+            {% if error %}
+                <div class="mb-4 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            {% if app.user %}
+                <div class="mb-4 p-3 rounded-md bg-secondary text-secondary-foreground text-sm">
+                    Vous êtes connecté en tant que {{ app.user.userIdentifier }},
+                    <a href="{{ logout_path() }}" class="font-medium text-primary hover:underline">Déconnexion</a>
+                </div>
+            {% endif %}
+
+            <form method="post" class="space-y-4">
+                <div>
+                    <label for="inputEmail" class="block text-sm font-medium mb-1.5">Email</label>
+                    <input
+                        type="email"
+                        value="{{ last_username }}"
+                        name="email"
+                        id="inputEmail"
+                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        autocomplete="email"
+                        placeholder="nom@exemple.com"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <div>
+                    <label for="inputPassword" class="block text-sm font-medium mb-1.5">Mot de passe</label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="inputPassword"
+                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        autocomplete="current-password"
+                        placeholder="Votre mot de passe"
+                        required
+                    >
+                </div>
+
+                <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+                <button
+                    type="submit"
+                    class="w-full rounded-md bg-primary text-primary-foreground font-medium py-2 px-4 text-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
+                >
+                    Se connecter
+                </button>
+            </form>
+        </div>
+    </div>
 {% endblock %}
