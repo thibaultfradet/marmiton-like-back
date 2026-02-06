@@ -24,6 +24,7 @@ final class RecipeController extends AbstractController
             $now = new \DateTimeImmutable();
             $recipe->setCreatedAt($now);
             $recipe->setUpdatedAt($now);
+            $recipe->setAuthor($this->getUser());
 
             $entityManager->persist($recipe);
             $entityManager->flush();

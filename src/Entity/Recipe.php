@@ -46,6 +46,9 @@ class Recipe
     #[ORM\ManyToOne(inversedBy: 'recipes')]
     private ?Category $category = null;
 
+    #[ORM\ManyToOne]
+    private ?User $author = null;
+
     /**
      * @var Collection<int, Tag>
      */
@@ -202,6 +205,18 @@ class Recipe
     public function removeTag(Tag $tag): static
     {
         $this->Tags->removeElement($tag);
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }

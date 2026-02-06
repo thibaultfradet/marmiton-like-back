@@ -3,23 +3,175 @@
 {% block title %}Accueil - Marmiton{% endblock %}
 
 {% block body %}
-    {# Categories section #}
-    <section>
-        <h1 class="text-2xl font-bold text-foreground mb-6">Catégories</h1>
+<div data-controller="filter">
 
-        {% if categories is empty %}
-            <p class="text-muted-foreground">Aucune catégorie pour le moment.</p>
+    {# Filters card #}
+    <section class="mb-8 bg-card text-card-foreground rounded-lg border border-border shadow-sm p-6 space-y-5">
+        <h2 class="text-lg font-semibold text-foreground">Filtres</h2>
+
+        {# Global search #}
+        <div>
+            <label for="filter-search" class="block text-sm font-medium mb-1.5">Rechercher</label>
+            <input
+                id="filter-search"
+                type="text"
+                placeholder="Rechercher une recette..."
+                data-filter-target="search"
+                data-action="input->filter#searchInput"
+                class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+        </div>
+
+        {# Categories filter #}
+        {% if categories is not empty %}
+            <div>
+                <h3 class="block text-sm font-medium mb-1.5">Catégories</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {% for category in categories %}
+                        <button
+                            type="button"
+                            data-filter-target="category"
+                            data-filter-value="{{ category.id }}"
+                            data-action="click->filter#filterCategory"
+                            class="rounded-md border border-input bg-background px-3 py-2.5 text-sm font-medium text-foreground transition-colors cursor-pointer hover:border-primary/50 text-center"
+                        >
+                            {{ category.label }}
+                            <span class="block text-xs text-muted-foreground mt-0.5">
+                                {{ category.recipes|length }} recette{{ category.recipes|length > 1 ? 's' : '' }}
+                            </span>
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {# Tags filter #}
+        {% if tags is not empty %}
+            <div>
+                <h3 class="block text-sm font-medium mb-1.5">Tags</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {% for tag in tags %}
+                        <button
+                            type="button"
+                            data-filter-target="tag"
+                            data-filter-value="{{ tag.id }}"
+                            data-action="click->filter#toggleTag"
+                            class="rounded-full border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors cursor-pointer hover:border-primary/50 text-center"
+                        >
+                            {{ tag.label }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {# Author filter - select dropdown #}
+        {% if users is not empty %}
+            <div>
+                <label for="filter-author" class="block text-sm font-medium mb-1.5">Créateur</label>
+                <select
+                    id="filter-author"
+                    data-filter-target="author"
+                    data-action="change->filter#filterAuthor"
+                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                    <option value="">Tous les créateurs</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.firstName }} {{ user.lastName }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+    </section>
+
+    {# Recipe grid #}
+    <section>
+        <h2 class="text-lg font-semibold text-foreground mb-4">Recettes</h2>
+
+        {# Dynamic empty state (shown by JS when filters match nothing) #}
+        <p data-filter-target="empty" class="text-sm text-muted-foreground hidden">
+            Aucune recette ne correspond aux filtres sélectionnés.
+        </p>
+
+        {% if recipes is empty %}
+            <p class="text-sm text-muted-foreground">Aucune recette pour le moment.</p>
         {% else %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {% for category in categories %}
-                    <a href="#" class="block rounded-lg bg-card text-card-foreground p-6 border border-border shadow-sm hover:shadow-md hover:border-primary/30 transition-all">
-                        <h2 class="text-lg font-semibold">{{ category.label }}</h2>
-                        <p class="text-sm text-muted-foreground mt-1">
-                            {{ category.recipes|length }} recette{{ category.recipes|length > 1 ? 's' : '' }}
-                        </p>
-                    </a>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for recipe in recipes %}
+                    <div
+                        data-filter-target="card"
+                        data-category="{{ recipe.category ? recipe.category.id : '' }}"
+                        data-tags="{{ recipe.tags|map(t => t.id)|join(',') }}"
+                        data-author="{{ recipe.author ? recipe.author.id : '' }}"
+                        data-search-text="{{ recipe.label|lower }} {{ recipe.description|default('')|lower }} {{ recipe.author ? (recipe.author.firstName ~ ' ' ~ recipe.author.lastName)|lower : '' }}"
+                        class="bg-card text-card-foreground rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                    >
+                        <div class="p-5">
+                            {# Title + category badge #}
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <h3 class="text-base font-semibold text-foreground leading-tight">{{ recipe.label }}</h3>
+                                {% if recipe.category %}
+                                    <span class="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-medium">
+                                        {{ recipe.category.label }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            {# Description #}
+                            {% if recipe.description %}
+                                <p class="text-sm text-muted-foreground mb-3 line-clamp-2">{{ recipe.description }}</p>
+                            {% endif %}
+
+                            {# Meta: times + servings #}
+                            <div class="flex items-center gap-4 text-xs text-muted-foreground mb-3">
+                                {% if recipe.preparationTime %}
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                                        {{ recipe.preparationTime }} min prépa
+                                    </span>
+                                {% endif %}
+                                {% if recipe.cookingTime %}
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v4m0 12v4m10-10h-4M6 12H2m15.07-5.07l-2.83 2.83M9.76 14.24l-2.83 2.83m11.14 0l-2.83-2.83M9.76 9.76L6.93 6.93"/></svg>
+                                        {{ recipe.cookingTime }} min cuisson
+                                    </span>
+                                {% endif %}
+                                {% if recipe.quantity %}
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"/></svg>
+                                        {{ recipe.quantity }} pers.
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            {# Tags pills #}
+                            {% if recipe.tags|length > 0 %}
+                                <div class="flex flex-wrap gap-1.5 mb-3">
+                                    {% for tag in recipe.tags %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-xs">
+                                            {{ tag.label }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {# Author #}
+                            {% if recipe.author %}
+                                <div class="flex items-center gap-2 pt-3 border-t border-border">
+                                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold">
+                                        {{ recipe.author.firstName|first|upper }}{{ recipe.author.lastName|first|upper }}
+                                    </span>
+                                    <span class="text-xs text-muted-foreground">
+                                        {{ recipe.author.firstName }} {{ recipe.author.lastName|first }}.
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
     </section>
+
+</div>
 {% endblock %}
