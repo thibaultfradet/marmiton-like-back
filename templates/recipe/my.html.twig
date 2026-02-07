@@ -32,7 +32,14 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {% for recipe in recipes %}
                     <div class="bg-card text-card-foreground rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
-                        <a href="{{ path('app_recipe_show', {id: recipe.id}) }}" class="flex-1 p-5">
+                        <a href="{{ path('app_recipe_show', {id: recipe.id}) }}" class="flex-1">
+                            {# Recipe photo #}
+                            {% set photoUrl = recipe_photo_url(recipe.id) %}
+                            {% if photoUrl %}
+                                <img src="{{ photoUrl }}" alt="{{ recipe.label }}" class="w-full h-40 object-cover">
+                            {% endif %}
+
+                          <div class="p-5">
                             {# Title + category badge #}
                             <div class="flex items-start justify-between gap-2 mb-2">
                                 <h3 class="text-base font-semibold text-foreground leading-tight">{{ recipe.label }}</h3>
@@ -80,6 +87,7 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
+                          </div>
                         </a>
 
                         {# Edit button #}

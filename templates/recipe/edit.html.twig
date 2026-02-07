@@ -78,6 +78,29 @@ w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-
                     <div data-multiselect-target="options" class="flex flex-wrap gap-2"></div>
                 </div>
 
+                {# Photo #}
+                <div>
+                    <label class="block text-sm font-medium mb-1.5">Photo</label>
+
+                    {# Current photo preview #}
+                    {% set photoUrl = recipe_photo_url(recipe.id) %}
+                    {% if photoUrl %}
+                        <div class="mb-3">
+                            <img src="{{ photoUrl }}" alt="{{ recipe.label }}" class="h-32 w-auto rounded-md border border-border object-cover">
+                            <div class="mt-2 flex items-center gap-2">
+                                {{ form_widget(form.deletePhoto, {'attr': {'class': 'rounded border-input'}}) }}
+                                {{ form_label(form.deletePhoto, null, {'label_attr': {'class': 'text-sm text-muted-foreground'}}) }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {{ form_widget(form.photo, {'attr': {'class': _self.input_class(form.photo), 'accept': 'image/jpeg,image/png,image/webp'}}) }}
+                    {% if form.photo.vars.errors|length > 0 %}
+                        <p class="text-xs text-destructive mt-1">{{ form.photo.vars.errors[0].message }}</p>
+                    {% endif %}
+                    <p class="text-xs text-muted-foreground mt-1">JPEG, PNG ou WebP. 5 Mo max.{% if photoUrl %} Laissez vide pour conserver la photo actuelle.{% endif %}</p>
+                </div>
+
                 {# Actions #}
                 <div class="flex items-center justify-between pt-4">
                     <a href="{{ path('app_recipe_show', {id: recipe.id}) }}" class="rounded-md border border-gray-300 bg-white text-foreground font-medium py-2 px-6 text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors">

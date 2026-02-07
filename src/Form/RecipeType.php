@@ -7,11 +7,14 @@ use App\Entity\Recipe;
 use App\Entity\Tag;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RecipeType extends AbstractType
@@ -77,13 +80,34 @@ class RecipeType extends AbstractType
                 'expanded' => false,
                 'required' => false,
             ])
+            ->add('photo', FileType::class, [
+                'label' => 'Photo',
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new File(
+                        maxSize: '5M',
+                        mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+                        mimeTypesMessage: 'Veuillez uploader une image valide (JPEG, PNG ou WebP)',
+                    ),
+                ],
+            ])
         ;
+
+        if ($options['is_edit']) {
+            $builder->add('deletePhoto', CheckboxType::class, [
+                'label' => 'Supprimer la photo actuelle',
+                'mapped' => false,
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Recipe::class,
+            'is_edit' => false,
         ]);
     }
 }

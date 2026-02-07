@@ -78,6 +78,16 @@ w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-
                     <div data-multiselect-target="options" class="flex flex-wrap gap-2"></div>
                 </div>
 
+                {# Photo upload #}
+                <div>
+                    {{ form_label(form.photo, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                    {{ form_widget(form.photo, {'attr': {'class': _self.input_class(form.photo), 'accept': 'image/jpeg,image/png,image/webp'}}) }}
+                    {% if form.photo.vars.errors|length > 0 %}
+                        <p class="text-xs text-destructive mt-1">{{ form.photo.vars.errors[0].message }}</p>
+                    {% endif %}
+                    <p class="text-xs text-muted-foreground mt-1">JPEG, PNG ou WebP. 5 Mo max.</p>
+                </div>
+
                 {# Actions #}
                 <div class="flex items-center justify-between pt-4">
                     <a href="{{ path('app_home') }}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
