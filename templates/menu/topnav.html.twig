@@ -12,21 +12,27 @@
 
             {# Desktop search bar + create button #}
             <div class="hidden md:flex flex-1 max-w-sm mx-6 items-center">
-                <form class="w-full" action="#" method="GET">
+                <div data-controller="search" class="w-full relative">
                     <div class="relative">
                         <input
                             type="text"
-                            name="q"
+                            data-search-target="input"
+                            data-action="input->search#onInput"
                             placeholder="Rechercher une recette..."
                             class="w-full rounded-l-md border border-input bg-background py-2 pl-4 pr-10 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         >
-                        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </button>
                     </div>
-                </form>
+                    {# Search results dropdown #}
+                    <div
+                        data-search-target="results"
+                        class="hidden absolute left-0 right-0 mt-1 max-h-80 overflow-y-auto rounded-md bg-popover text-popover-foreground border border-border shadow-md z-50"
+                    ></div>
+                </div>
                 <a href="{{ path('app_recipe_new') }}" class="inline-flex items-center justify-center h-9.5 px-3 rounded-r-md border border-l-0 border-input bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" title="Nouvelle recette">
                     <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
@@ -104,14 +110,20 @@
     <div data-mobile-menu-target="menu" class="hidden md:hidden border-t border-border bg-card">
         <div class="px-4 py-4 space-y-3">
             {# Mobile search #}
-            <form action="#" method="GET">
+            <div data-controller="search" class="relative">
                 <input
                     type="text"
-                    name="q"
+                    data-search-target="input"
+                    data-action="input->search#onInput"
                     placeholder="Rechercher une recette..."
                     class="w-full rounded-md border border-input bg-background py-2 px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-            </form>
+                {# Mobile search results dropdown #}
+                <div
+                    data-search-target="results"
+                    class="hidden absolute left-0 right-0 mt-1 max-h-80 overflow-y-auto rounded-md bg-popover text-popover-foreground border border-border shadow-md z-50"
+                ></div>
+            </div>
 
             {# Mobile navigation links #}
             {% if app.user %}

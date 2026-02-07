@@ -41,6 +41,7 @@
   - `GET|POST /admin/users/{id}/edit` (app_admin_users_edit): edit user
   - `POST /admin/users/{id}/disable` (app_admin_users_disable): toggle soft-disable
 - `SecurityController` — `GET /login` (app_login), `GET /logout` (app_logout)
+- `SearchController` — `GET /api/search?q=...` (app_api_search): recipe autocomplete search (requires `ROLE_USER`)
 
 ## Forms
 - `RecipeType` — fields: label, description, ingredients, instructions, preparationTime, cookingTime, quantity (optional), category (required), Tags
@@ -80,6 +81,7 @@
 - `filter_controller.js` — client-side recipe filtering by category, tags, author, search text (targets: `card`, `category`, `tag`, `author`, `search`, `empty`)
 - `multiselect_controller.js` — converts hidden `<select multiple>` into pill-based UI (targets: `select`, `options`)
 - `csrf_protection_controller.js` — double-submit CSRF token pattern for forms
+- `search_controller.js` — autocomplete search for recipes with debounce (300ms), fetches from `/api/search?q=...`, displays results in dropdown (targets: `input`, `results`)
 
 ## Symfony conventions
 - Controllers in `src/Controller/`, routes via `#[Route]` attributes

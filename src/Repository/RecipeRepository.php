@@ -40,4 +40,24 @@ class RecipeRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    /**
+     * @return Recipe[] Returns an array of Recipe objects matching the search query
+     */
+    public function search(string $query): array
+    {
+        return $this->createQueryBuilder('r')
+            ->leftJoin('r.category', 'c')
+            ->leftJoin('r.author', 'a')
+            ->where('r.label LIKE :query OR r.description LIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->orderBy('CASE WHEN r.label LIKE :exactQuery THEN 0 ELSE 1 END', 'ASC')
+            ->addOrderBy('r.label', 'ASC')
+            ->setParameter('exactQuery', $query . '%')
+            ->setMaxResults(8)
+            ->select('r, c, a')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }
