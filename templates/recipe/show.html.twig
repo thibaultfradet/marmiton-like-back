@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ recipe.label }} - Marmiton{% endblock %}
+
+{% block body %}
+    <div class="max-w-3xl mx-auto">
+
+        {# Back link #}
+        <div class="mb-6">
+            <a href="{{ path('app_home') }}" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                </svg>
+                Retour aux recettes
+            </a>
+        </div>
+
+        {# Recipe header #}
+        <div class="mb-8">
+            <div class="flex items-start justify-between gap-4 mb-3">
+                <h1 class="text-3xl font-bold text-foreground">{{ recipe.label }}</h1>
+                {% if recipe.category %}
+                    <span class="shrink-0 inline-flex items-center px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-sm font-medium">
+                        {{ recipe.category.label }}
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if recipe.description %}
+                <p class="text-muted-foreground text-base leading-relaxed mb-4">{{ recipe.description }}</p>
+            {% endif %}
+
+            {# Author + date #}
+            {% if recipe.author %}
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                        {{ recipe.author.firstName|first|upper }}{{ recipe.author.lastName|first|upper }}
+                    </span>
+                    <div>
+                        <p class="text-sm font-medium text-foreground">{{ recipe.author.firstName }} {{ recipe.author.lastName }}</p>
+                        <p class="text-xs text-muted-foreground">Publiée le {{ recipe.createdAt|date('d/m/Y') }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Meta cards row #}
+        {% if recipe.preparationTime or recipe.cookingTime or recipe.quantity %}
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+                {% if recipe.preparationTime %}
+                    <div class="bg-card text-card-foreground rounded-lg border border-border p-4 text-center">
+                        <svg class="h-5 w-5 mx-auto mb-1.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                        <p class="text-lg font-semibold text-foreground">{{ recipe.preparationTime }} min</p>
+                        <p class="text-xs text-muted-foreground">Préparation</p>
+                    </div>
+                {% endif %}
+                {% if recipe.cookingTime %}
+                    <div class="bg-card text-card-foreground rounded-lg border border-border p-4 text-center">
+                        <svg class="h-5 w-5 mx-auto mb-1.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.468 5.99 5.99 0 00-1.925 3.547 5.975 5.975 0 01-2.133-1.001A3.75 3.75 0 0012 18z"/></svg>
+                        <p class="text-lg font-semibold text-foreground">{{ recipe.cookingTime }} min</p>
+                        <p class="text-xs text-muted-foreground">Cuisson</p>
+                    </div>
+                {% endif %}
+                {% if recipe.quantity %}
+                    <div class="bg-card text-card-foreground rounded-lg border border-border p-4 text-center">
+                        <svg class="h-5 w-5 mx-auto mb-1.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"/></svg>
+                        <p class="text-lg font-semibold text-foreground">{{ recipe.quantity }}</p>
+                        <p class="text-xs text-muted-foreground">Personnes</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {# Ingredients card #}
+        <div class="bg-card text-card-foreground rounded-lg border border-border shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <svg class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
+                </svg>
+                Ingrédients
+            </h2>
+            <div class="text-sm text-foreground leading-relaxed whitespace-pre-line">{{ recipe.ingredients }}</div>
+        </div>
+
+        {# Instructions card #}
+        <div class="bg-card text-card-foreground rounded-lg border border-border shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <svg class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"/>
+                </svg>
+                Instructions
+            </h2>
+            <div class="text-sm text-foreground leading-relaxed whitespace-pre-line">{{ recipe.instructions }}</div>
+        </div>
+
+        {# Tags #}
+        {% if recipe.tags|length > 0 %}
+            <div class="flex flex-wrap gap-2 mb-8">
+                {% for tag in recipe.tags %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-accent text-accent-foreground text-sm">
+                        {{ tag.label }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {# Edit button for author #}
+        {% if app.user and recipe.author and app.user.id == recipe.author.id %}
+            <div class="flex justify-center">
+                <a href="{{ path('app_recipe_edit', {id: recipe.id}) }}" class="inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground font-medium py-2 px-6 text-sm hover:bg-primary/90 transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>
+                    </svg>
+                    Modifier la recette
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}

@@ -106,7 +106,7 @@
                         data-search-text="{{ recipe.label|lower }} {{ recipe.description|default('')|lower }} {{ recipe.author ? (recipe.author.firstName ~ ' ' ~ recipe.author.lastName)|lower : '' }}"
                         class="bg-card text-card-foreground rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                     >
-                        <div class="p-5">
+                        <a href="{{ path('app_recipe_show', {id: recipe.id}) }}" class="block p-5">
                             {# Title + category badge #}
                             <div class="flex items-start justify-between gap-2 mb-2">
                                 <h3 class="text-base font-semibold text-foreground leading-tight">{{ recipe.label }}</h3>
@@ -166,7 +166,7 @@
                                     </span>
                                 </div>
                             {% endif %}
-                        </div>
+                        </a>
                     </div>
                 {% endfor %}
             </div>
