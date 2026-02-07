@@ -34,7 +34,7 @@ class Recipe
     #[ORM\Column(nullable: true)]
     private ?int $cookingTime = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $quantity = null;
 
     #[ORM\Column]
@@ -142,7 +142,7 @@ class Recipe
         return $this->quantity;
     }
 
-    public function setQuantity(int $quantity): static
+    public function setQuantity(?int $quantity): static
     {
         $this->quantity = $quantity;
 

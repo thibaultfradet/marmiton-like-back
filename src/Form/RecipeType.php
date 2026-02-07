@@ -56,17 +56,18 @@ class RecipeType extends AbstractType
             ])
             ->add('quantity', IntegerType::class, [
                 'label' => 'Nombre de personnes',
-                'constraints' => [
-                    new NotBlank(message: 'Veuillez entrer le nombre de personnes'),
-                ],
+                'required' => false,
                 'attr' => ['min' => 1],
             ])
             ->add('category', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => 'label',
                 'label' => 'Catégorie',
-                'required' => false,
+                'required' => true,
                 'placeholder' => 'Sélectionner une catégorie',
+                'constraints' => [
+                    new NotBlank(message: 'Veuillez sélectionner une catégorie'),
+                ],
             ])
             ->add('Tags', EntityType::class, [
                 'class' => Tag::class,
