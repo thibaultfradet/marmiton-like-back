@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ recipe.label }} - Marmiton{% endblock %}
+
+{# Macro for consistent input classes with red border on error #}
+{% macro input_class(field, extra) %}
+{%- apply spaceless -%}
+w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2
+{%- if field.vars.errors|length > 0 %} border-destructive focus:ring-destructive{% else %} border-input focus:ring-ring{% endif -%}
+{%- if extra %} {{ extra }}{% endif -%}
+{%- endapply -%}
+{% endmacro %}
+
+{% block body %}
+    <div class="max-w-2xl mx-auto">
+        {# Page header #}
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-foreground">Modifier la recette</h1>
+            <p class="text-sm text-muted-foreground mt-1">{{ recipe.label }}</p>
+        </div>
+
+        {# Form card #}
+        <div class="bg-card text-card-foreground rounded-lg border border-border shadow-sm p-6">
+            {{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
+
+                {# Label #}
+                <div>
+                    {{ form_label(form.label, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                    {{ form_widget(form.label, {'attr': {'class': _self.input_class(form.label), 'placeholder': 'Ex: Tarte aux pommes'}}) }}
+                </div>
+
+                {# Description #}
+                <div>
+                    {{ form_label(form.description, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': _self.input_class(form.description, 'resize-y'), 'placeholder': 'Décrivez votre recette...'}}) }}
+                </div>
+
+                {# Ingredients #}
+                <div>
+                    {{ form_label(form.ingredients, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                    {{ form_widget(form.ingredients, {'attr': {'class': _self.input_class(form.ingredients, 'resize-y'), 'placeholder': 'Un ingrédient par ligne...'}}) }}
+                </div>
+
+                {# Instructions #}
+                <div>
+                    {{ form_label(form.instructions, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                    {{ form_widget(form.instructions, {'attr': {'class': _self.input_class(form.instructions, 'resize-y'), 'placeholder': 'Détaillez les étapes...'}}) }}
+                </div>
+
+                {# Time fields row #}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        {{ form_label(form.preparationTime, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                        {{ form_widget(form.preparationTime, {'attr': {'class': _self.input_class(form.preparationTime), 'placeholder': '0'}}) }}
+                    </div>
+                    <div>
+                        {{ form_label(form.cookingTime, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                        {{ form_widget(form.cookingTime, {'attr': {'class': _self.input_class(form.cookingTime), 'placeholder': '0'}}) }}
+                    </div>
+                    <div>
+                        {{ form_label(form.quantity, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                        {{ form_widget(form.quantity, {'attr': {'class': _self.input_class(form.quantity), 'placeholder': '4'}}) }}
+                    </div>
+                </div>
+
+                {# Category #}
+                <div>
+                    {{ form_label(form.category, null, {'label_attr': {'class': 'block text-sm font-medium mb-1.5'}}) }}
+                    {{ form_widget(form.category, {'attr': {'class': _self.input_class(form.category)}}) }}
+                </div>
+
+                {# Tags - multi-select pills #}
+                <div data-controller="multiselect">
+                    {{ form_label(form.Tags, null, {'label_attr': {'class': 'block text-sm font-medium mb-2'}}) }}
+                    <div class="hidden">
+                        {{ form_widget(form.Tags, {'attr': {'data-multiselect-target': 'select'}}) }}
+                    </div>
+                    <div data-multiselect-target="options" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                {# Actions #}
+                <div class="flex items-center justify-between pt-4">
+                    <a href="{{ path('app_recipe_show', {id: recipe.id}) }}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        Annuler
+                    </a>
+                    <button
+                        type="submit"
+                        class="rounded-md bg-primary text-primary-foreground font-medium py-2 px-6 text-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
+                    >
+                        Enregistrer les modifications
+                    </button>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
