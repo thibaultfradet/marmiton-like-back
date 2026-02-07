@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -39,6 +41,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $disabledAt = null;
+
+    /**
+     * @var Collection<int, Recipe>
+     */
+    #[ORM\ManyToMany(targetEntity: Recipe::class)]
+    #[ORM\JoinTable(name: 'user_favorite_recipe')]
+    private Collection $favorites;
+
+    public function __construct()
+    {
+        $this->favorites = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -149,5 +163,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->lastName = $lastName;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Recipe>
+     */
+    public function getFavorites(): Collection
+    {
+        return $this->favorites;
+    }
+
+    public function addFavorite(Recipe $recipe): static
+    {
+        if (!$this->favorites->contains($recipe)) {
+            $this->favorites->add($recipe);
+        }
+
+        return $this;
+    }
+
+    public function removeFavorite(Recipe $recipe): static
+    {
+        $this->favorites->removeElement($recipe);
+
+        return $this;
+    }
+
+    public function isFavorite(Recipe $recipe): bool
+    {
+        return $this->favorites->contains($recipe);
     }
 }
