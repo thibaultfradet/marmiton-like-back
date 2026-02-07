@@ -37,6 +37,14 @@
     --sidebar-ring: oklch(0.52 0.17 250);
 }
 
+/* Global cursor pointer for interactive elements */
+button,
+[type="button"],
+[type="submit"],
+[type="reset"] {
+    cursor: pointer;
+}
+
 /* Register theme colors as Tailwind utilities */
 @theme {
     --color-background: var(--background);
