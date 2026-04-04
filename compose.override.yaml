@@ -2,7 +2,7 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     ports:
-      - "5432:5432"
+      - "3306:3306"
 ###< doctrine/doctrine-bundle ###
 
 ###> symfony/mailer ###
@@ -16,12 +16,13 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
 ###< symfony/mailer ###
 
-  adminer:
-    image: adminer
+  phpmyadmin:
+    image: phpmyadmin:latest
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
-      ADMINER_DEFAULT_SERVER: database
-      ADMINER_DESIGN: pepa-linha
+      PMA_HOST: database
+      PMA_USER: app
+      PMA_PASSWORD: password
     depends_on:
       - database
