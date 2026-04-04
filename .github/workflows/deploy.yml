@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: ${{ secrets.DEPLOY_PATH }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .env.local
+            var/**
+            vendor/**
+            compose.yaml
+            compose.override.yaml
+            logs/**
+
+      - name: Post-deploy
+        run: |
+          curl -k --http1.1 -X POST \
+            -H "X-Deploy-Token: ${{ secrets.DEPLOY_HOOK_TOKEN }}" \
+            "${{ secrets.APP_URL }}/deploy-hook.php" || true
