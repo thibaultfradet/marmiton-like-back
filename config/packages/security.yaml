@@ -18,11 +18,13 @@ security:
             jwt: ~
 
     access_control:
-        - { path: ^/api/auth/login,   roles: PUBLIC_ACCESS }
-        - { path: ^/api/auth/refresh, roles: PUBLIC_ACCESS }
-        - { path: ^/api/auth/logout,  roles: PUBLIC_ACCESS }
-        - { path: ^/api/admin,        roles: ROLE_ADMIN }
-        - { path: ^/api/,             roles: ROLE_USER }
+        - { path: ^/api/auth/login,           roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/refresh,         roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/logout,          roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/reset-password,  roles: PUBLIC_ACCESS }
+        - { path: ^/api/admin,                roles: ROLE_ADMIN }
+        - { path: ^/api/,                     roles: ROLE_USER }
 
 when@test:
     security:
