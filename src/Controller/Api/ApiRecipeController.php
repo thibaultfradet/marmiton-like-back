@@ -11,6 +11,7 @@ use App\Repository\TagRepository;
 use App\Service\ApiResponseService;
 use App\Service\RecipeNormalizer;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -43,11 +44,17 @@ final class ApiRecipeController extends AbstractController
         $categoryId = $request->query->get('category');
         $tagId      = $request->query->get('tag');
         $search     = $request->query->get('q');
+        $page       = max(1, (int) $request->query->get('page', '1'));
+        $limit      = min(50, max(1, (int) $request->query->get('limit', '15')));
 
-        $recipes = $this->buildFilteredQuery($categoryId, $tagId, $search);
+        [$recipes, $total] = $this->buildFilteredQuery($categoryId, $tagId, $search, $page, $limit);
 
         return $this->api->success([
             'recipes'    => $this->normalizer->normalizeList($recipes, $user),
+            'total'      => $total,
+            'page'       => $page,
+            'limit'      => $limit,
+            'hasMore'    => ($page * $limit) < $total,
             'categories' => array_map(
                 fn ($c) => ['id' => $c->getId(), 'label' => $c->getLabel()],
                 $this->categoryRepository->findBy([], ['label' => 'ASC'])
@@ -241,9 +248,9 @@ final class ApiRecipeController extends AbstractController
     }
 
     /**
-     * @return \App\Entity\Recipe[]
+     * @return array{0: \App\Entity\Recipe[], 1: int}
      */
-    private function buildFilteredQuery(?string $categoryId, ?string $tagId, ?string $search): array
+    private function buildFilteredQuery(?string $categoryId, ?string $tagId, ?string $search, int $page, int $limit): array
     {
         $qb = $this->recipeRepository->createQueryBuilder('r')
             ->leftJoin('r.category', 'c')
@@ -264,6 +271,12 @@ final class ApiRecipeController extends AbstractController
                ->setParameter('search', '%' . $search . '%');
         }
 
-        return $qb->getQuery()->getResult();
+        $qb->setFirstResult(($page - 1) * $limit)->setMaxResults($limit);
+
+        $paginator = new Paginator($qb->getQuery(), fetchJoinCollection: true);
+        $total     = count($paginator);
+        $recipes   = iterator_to_array($paginator->getIterator());
+
+        return [$recipes, $total];
     }
 }
