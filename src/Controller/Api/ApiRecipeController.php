@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Recipe;
 use App\Entity\User;
 use App\Repository\CategoryRepository;
 use App\Repository\RatingRepository;
@@ -9,7 +10,10 @@ use App\Repository\RecipeRepository;
 use App\Repository\TagRepository;
 use App\Service\ApiResponseService;
 use App\Service\RecipeNormalizer;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,6 +29,8 @@ final class ApiRecipeController extends AbstractController
         private readonly RatingRepository $ratingRepository,
         private readonly CategoryRepository $categoryRepository,
         private readonly TagRepository $tagRepository,
+        private readonly EntityManagerInterface $em,
+        #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
     ) {
     }
 
@@ -85,6 +91,153 @@ final class ApiRecipeController extends AbstractController
         }
 
         return $this->api->success($data);
+    }
+
+    #[Route('', name: 'api_recipes_create', methods: ['POST'])]
+    public function create(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        $error = $this->validateRecipePayload($data);
+        if ($error) {
+            return $this->api->error($error);
+        }
+
+        $recipe = new Recipe();
+        $this->hydrateRecipe($recipe, $data);
+        $now = new \DateTimeImmutable();
+        $recipe->setCreatedAt($now)->setUpdatedAt($now)->setAuthor($user);
+
+        $this->em->persist($recipe);
+        $this->em->flush();
+
+        return $this->api->success(
+            $this->normalizer->normalize($recipe, $user),
+            'Recette créée avec succès.',
+            Response::HTTP_CREATED
+        );
+    }
+
+    #[Route('/{id}', name: 'api_recipes_update', requirements: ['id' => '\d+'], methods: ['PUT'])]
+    public function update(int $id, Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user   = $this->getUser();
+        $recipe = $this->recipeRepository->find($id);
+
+        if (!$recipe) {
+            return $this->api->error('Recette introuvable.', Response::HTTP_NOT_FOUND);
+        }
+
+        if ($recipe->getAuthor() !== $user) {
+            return $this->api->error('Accès refusé.', Response::HTTP_FORBIDDEN);
+        }
+
+        $data  = json_decode($request->getContent(), true) ?? [];
+        $error = $this->validateRecipePayload($data);
+        if ($error) {
+            return $this->api->error($error);
+        }
+
+        $this->hydrateRecipe($recipe, $data);
+        $recipe->setUpdatedAt(new \DateTimeImmutable());
+        $this->em->flush();
+
+        return $this->api->success($this->normalizer->normalize($recipe, $user), 'Recette mise à jour.');
+    }
+
+    #[Route('/{id}/photo', name: 'api_recipes_photo_upload', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function uploadPhoto(int $id, Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user   = $this->getUser();
+        $recipe = $this->recipeRepository->find($id);
+
+        if (!$recipe) {
+            return $this->api->error('Recette introuvable.', Response::HTTP_NOT_FOUND);
+        }
+
+        if ($recipe->getAuthor() !== $user) {
+            return $this->api->error('Accès refusé.', Response::HTTP_FORBIDDEN);
+        }
+
+        /** @var UploadedFile|null $photo */
+        $photo = $request->files->get('photo');
+        if (!$photo) {
+            return $this->api->error('Aucun fichier fourni.');
+        }
+
+        $uploadsDir = $this->projectDir . '/public/uploads';
+        if (!is_dir($uploadsDir)) {
+            mkdir($uploadsDir, 0755, true);
+        }
+        $photo->move($uploadsDir, 'recipe-' . $recipe->getId() . '.png');
+
+        return $this->api->success(['photoUrl' => '/uploads/recipe-' . $recipe->getId() . '.png']);
+    }
+
+    #[Route('/{id}/photo', name: 'api_recipes_photo_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    public function deletePhoto(int $id): JsonResponse
+    {
+        /** @var User $user */
+        $user   = $this->getUser();
+        $recipe = $this->recipeRepository->find($id);
+
+        if (!$recipe) {
+            return $this->api->error('Recette introuvable.', Response::HTTP_NOT_FOUND);
+        }
+
+        if ($recipe->getAuthor() !== $user) {
+            return $this->api->error('Accès refusé.', Response::HTTP_FORBIDDEN);
+        }
+
+        $photoPath = $this->projectDir . '/public/uploads/recipe-' . $recipe->getId() . '.png';
+        if (file_exists($photoPath)) {
+            unlink($photoPath);
+        }
+
+        return $this->api->success(null, 'Photo supprimée.');
+    }
+
+    private function validateRecipePayload(array $data): ?string
+    {
+        if (empty(trim((string) ($data['label'] ?? '')))) {
+            return 'Le titre est requis.';
+        }
+        if (empty(trim((string) ($data['ingredients'] ?? '')))) {
+            return 'Les ingrédients sont requis.';
+        }
+        if (empty(trim((string) ($data['instructions'] ?? '')))) {
+            return 'Les instructions sont requises.';
+        }
+        return null;
+    }
+
+    private function hydrateRecipe(Recipe $recipe, array $data): void
+    {
+        $recipe->setLabel(trim((string) $data['label']));
+        $recipe->setDescription(isset($data['description']) ? trim((string) $data['description']) : null);
+        $recipe->setIngredients(trim((string) $data['ingredients']));
+        $recipe->setInstructions(trim((string) $data['instructions']));
+        $recipe->setPreparationTime(isset($data['preparationTime']) ? (int) $data['preparationTime'] : null);
+        $recipe->setCookingTime(isset($data['cookingTime']) ? (int) $data['cookingTime'] : null);
+        $recipe->setQuantity(isset($data['quantity']) ? (int) $data['quantity'] : null);
+
+        $category = isset($data['categoryId']) ? $this->categoryRepository->find((int) $data['categoryId']) : null;
+        $recipe->setCategory($category);
+
+        // Sync tags
+        foreach ($recipe->getTags()->toArray() as $tag) {
+            $recipe->removeTag($tag);
+        }
+        foreach ((array) ($data['tagIds'] ?? []) as $tagId) {
+            $tag = $this->tagRepository->find((int) $tagId);
+            if ($tag) {
+                $recipe->addTag($tag);
+            }
+        }
     }
 
     /**
