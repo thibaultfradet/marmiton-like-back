@@ -16,6 +16,10 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        api:
+            pattern: ^/api/
+            stateless: true
+            jwt: ~
         main:
             lazy: true
             provider: app_user_provider
@@ -34,11 +38,15 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
-
-        - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/, roles: ROLE_USER }
+        - { path: ^/api/auth/login,   roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/refresh, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/logout,  roles: PUBLIC_ACCESS }
+        - { path: ^/api/admin,        roles: ROLE_ADMIN }
+        - { path: ^/api/,             roles: ROLE_USER }
+        - { path: ^/login,            roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password,   roles: PUBLIC_ACCESS }
+        - { path: ^/admin,            roles: ROLE_ADMIN }
+        - { path: ^/,                 roles: ROLE_USER }
 
 when@test:
     security:
