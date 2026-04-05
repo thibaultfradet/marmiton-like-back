@@ -1,26 +1,10 @@
-DirectoryIndex index.php
-
-<IfModule mod_negotiation.c>
-    Options -MultiViews
-</IfModule>
-
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Sets the HTTP_AUTHORIZATION header removed by some Apache configs
-    RewriteCond %{HTTP:Authorization} .+
-    RewriteRule ^ - [E=HTTP_AUTHORIZATION:%0]
-
-    # If the requested filename exists, serve it directly (assets, etc.)
+    # Si fichier existe → OK
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
-    # Rewrite all other requests to the front controller
-    RewriteRule ^ index.php [L]
-</IfModule>
-
-<IfModule !mod_rewrite.c>
-    <IfModule mod_alias.c>
-        RedirectMatch 307 ^/$ /index.php/
-    </IfModule>
+    # Sinon → Symfony
+    RewriteRule ^ index.php [QSA,L]
 </IfModule>
