@@ -56,7 +56,7 @@ final class ApiResetPasswordController extends AbstractController
 
         $this->mailer->send(
             (new Email())
-                ->from('noreply@marmiton-like.local')
+                ->from('no-reply@thibault-fradet.fr')
                 ->to($user->getEmail())
                 ->subject('Réinitialisation de votre mot de passe')
                 ->html($this->buildResetEmail($user->getFirstName(), $resetLink, $expiresAt))
@@ -106,7 +106,7 @@ final class ApiResetPasswordController extends AbstractController
               <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
                 <tr>
                   <td style="background:#c2440e;padding:32px 40px;text-align:center;">
-                    <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:.5px;">🍳 Marmiton-like</h1>
+                    <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:.5px;">🍳 Ron-recette</h1>
                   </td>
                 </tr>
                 <tr>
@@ -129,7 +129,7 @@ final class ApiResetPasswordController extends AbstractController
                 </tr>
                 <tr>
                   <td style="padding:20px 40px;border-top:1px solid #f5f5f4;text-align:center;">
-                    <p style="margin:0;font-size:12px;color:#a8a29e;">© Marmiton-like — Ne pas répondre à cet email.</p>
+                    <p style="margin:0;font-size:12px;color:#a8a29e;">© Ron-recette — Ne pas répondre à cet email.</p>
                   </td>
                 </tr>
               </table>
